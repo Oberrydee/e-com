@@ -15,16 +15,6 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<User>(builder =>
-        {
-            builder.HasIndex(u => u.Email).IsUnique();
-            builder.Property(u => u.Email).IsRequired();
-            builder.Property(u => u.PasswordHash).IsRequired();
-            builder.Property(u => u.FirstName).IsRequired();
-            builder.Property(u => u.LastName).IsRequired();
-            builder.Property(u => u.IsActive).HasDefaultValue(true);
-            builder.Property(u => u.Role).HasConversion<string>().HasDefaultValue("User");
-        });
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }
 }

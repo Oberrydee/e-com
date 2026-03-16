@@ -39,8 +39,18 @@ public class PasswordHasher : IPasswordHasher
             return false;
         }
 
-        var salt = Convert.FromBase64String(parts[1]);
-        var key = Convert.FromBase64String(parts[2]);
+        byte[] salt;
+        byte[] key;
+
+        try
+        {
+            salt = Convert.FromBase64String(parts[1]);
+            key = Convert.FromBase64String(parts[2]);
+        }
+        catch (FormatException)
+        {
+            return false;
+        }
 
         using var derivedBytes = new Rfc2898DeriveBytes(providedPassword, salt, iterations, HashAlgorithmName.SHA256);
         var computedKey = derivedBytes.GetBytes(key.Length);

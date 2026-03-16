@@ -1,0 +1,4 @@
+artifacts/
+.local/
+ECommerce.API/bin/
+ECommerce.API/obj/

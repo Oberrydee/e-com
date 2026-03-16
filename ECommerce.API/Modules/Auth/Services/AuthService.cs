@@ -32,9 +32,10 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
     {
+        var normalizedEmail = NormalizeEmail(request.Email);
         var existing = await _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
+            .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
 
         if (existing is not null)
         {
@@ -42,6 +43,7 @@ public class AuthService : IAuthService
         }
 
         var user = _mapper.Map<User>(request);
+        user.Email = normalizedEmail;
         user.PasswordHash = _passwordHasher.HashPassword(request.Password);
         user.CreatedAt = DateTime.UtcNow;
         user.UpdatedAt = DateTime.UtcNow;
@@ -63,9 +65,10 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> AuthenticateAsync(LoginRequestDto request)
     {
+        var normalizedEmail = NormalizeEmail(request.Email);
         var user = await _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == request.Email);
+            .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
 
         if (user is null || !_passwordHasher.VerifyPassword(user.PasswordHash, request.Password))
         {
@@ -89,4 +92,6 @@ public class AuthService : IAuthService
             Role = user.Role.ToString()
         };
     }
+
+    private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 }

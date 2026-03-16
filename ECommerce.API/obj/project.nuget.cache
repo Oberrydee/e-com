@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "abzhjT3AwHI=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\deeya\\Documents\\pwa-ecom\\e-com\\ECommerce.API\\ECommerce.API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\deeya\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.11\\microsoft.aspnetcore.openapi.9.0.11.nupkg.sha512",
+    "C:\\Users\\deeya\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}

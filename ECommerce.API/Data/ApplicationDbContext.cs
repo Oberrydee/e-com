@@ -1,4 +1,5 @@
 using ECommerce.API.Modules.Auth.Entities;
+using ECommerce.API.Modules.Products.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.API.Data;
@@ -11,6 +12,7 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Product> Products => Set<Product>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

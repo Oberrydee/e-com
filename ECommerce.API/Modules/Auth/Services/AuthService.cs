@@ -3,6 +3,7 @@ using ECommerce.API.Configuration;
 using ECommerce.API.Data;
 using ECommerce.API.Modules.Auth.DTOs;
 using ECommerce.API.Modules.Auth.Entities;
+using ECommerce.API.Modules.Products.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -45,10 +46,16 @@ public class AuthService : IAuthService
         }
 
         var user = _mapper.Map<User>(request);
+        var now = DateTime.UtcNow;
         user.Email = normalizedEmail;
         user.PasswordHash = _passwordHasher.HashPassword(request.Password);
-        user.CreatedAt = DateTime.UtcNow;
-        user.UpdatedAt = DateTime.UtcNow;
+        user.CreatedAt = now;
+        user.UpdatedAt = now;
+        user.Cart = new Cart
+        {
+            CreatedAt = now,
+            UpdatedAt = now
+        };
 
         _dbContext.Users.Add(user);
         try

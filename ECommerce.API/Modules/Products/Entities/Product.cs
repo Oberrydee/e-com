@@ -16,6 +16,6 @@ public class Product : BaseEntity
     public int ShellId { get; set; }
     public InventoryStatus InventoryStatus { get; set; } = InventoryStatus.OutOfStock;
     public double Rating { get; set; }
-    // public ICollection<ProductInCart> ProductsInCart { get; set; } = [];
-    // public ICollection<ProductInWishlist> ProductsInWishlist { get; set; } = [];
+    public ICollection<ProductInCart> ProductsInCart { get; set; } = [];
+    public ICollection<ProductInWishlist> ProductsInWishlist { get; set; } = [];
 }

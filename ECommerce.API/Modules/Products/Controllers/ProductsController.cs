@@ -1,5 +1,6 @@
 using ECommerce.API.Modules.Products.DTOs;
 using ECommerce.API.Modules.Products.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Modules.Products.Controllers;
@@ -30,6 +31,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "ProductManagement")]
     public async Task<IActionResult> Create([FromBody] ProductRequestDto request)
     {
         var product = await _productService.CreateAsync(request);
@@ -37,6 +39,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Policy = "ProductManagement")]
     public async Task<IActionResult> Update(int id, [FromBody] ProductRequestDto request)
     {
         var product = await _productService.UpdateAsync(id, request);
@@ -44,6 +47,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Policy = "ProductManagement")]
     public async Task<IActionResult> Delete(int id)
     {
         var deleted = await _productService.DeleteAsync(id);

@@ -1,4 +1,5 @@
 using System.Text;
+using System.Security.Claims;
 using ECommerce.API.Configuration;
 using ECommerce.API.Data;
 using ECommerce.API.Middleware;
@@ -41,6 +42,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<ProductRequestValidator>();
 
 // Authentication / Authorization
 var keyBytes = Encoding.UTF8.GetBytes(jwtSettings.Secret);
+const string ProductManagementPolicy = "ProductManagement";
+const string ProductAdminEmail = "admin@admin.com";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -62,7 +65,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(ProductManagementPolicy, policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim(ClaimTypes.Email, ProductAdminEmail);
+    });
+});
 
 // CORS
 const string CorsPolicyName = "DefaultCors";

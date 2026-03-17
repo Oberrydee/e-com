@@ -15,6 +15,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Cart> Carts => Set<Cart>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductInCart> ProductsInCart => Set<ProductInCart>();
+    public DbSet<Wishlist> Wishlists => Set<Wishlist>();
+    public DbSet<ProductInWishlist> ProductsInWishlist => Set<ProductInWishlist>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

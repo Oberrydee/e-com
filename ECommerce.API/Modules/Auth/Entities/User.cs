@@ -13,4 +13,5 @@ public class User : BaseEntity
     public UserRole Role { get; set; } = UserRole.User;
     public bool IsActive { get; set; } = true;
     public Cart? Cart { get; set; }
+    public ICollection<Wishlist> Wishlists { get; set; } = [];
 }

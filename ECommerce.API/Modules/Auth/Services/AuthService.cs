@@ -5,11 +5,13 @@ using ECommerce.API.Modules.Auth.DTOs;
 using ECommerce.API.Modules.Auth.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace ECommerce.API.Modules.Auth.Services;
 
 public class AuthService : IAuthService
 {
+    private const string DuplicateEmailMessage = "A user with this email already exists.";
     private readonly ApplicationDbContext _dbContext;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenService _jwtTokenService;
@@ -33,13 +35,13 @@ public class AuthService : IAuthService
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
     {
         var normalizedEmail = NormalizeEmail(request.Email);
-        var existing = await _dbContext.Users
+        var emailExists = await _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+            .AnyAsync(u => u.Email.ToLower() == normalizedEmail);
 
-        if (existing is not null)
+        if (emailExists)
         {
-            throw new InvalidOperationException("A user with this email already exists.");
+            throw new InvalidOperationException(DuplicateEmailMessage);
         }
 
         var user = _mapper.Map<User>(request);
@@ -49,7 +51,14 @@ public class AuthService : IAuthService
         user.UpdatedAt = DateTime.UtcNow;
 
         _dbContext.Users.Add(user);
-        await _dbContext.SaveChangesAsync();
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (IsUniqueEmailViolation(ex))
+        {
+            throw new InvalidOperationException(DuplicateEmailMessage);
+        }
 
         var token = _jwtTokenService.GenerateToken(user);
         return new AuthResponseDto
@@ -94,4 +103,9 @@ public class AuthService : IAuthService
     }
 
     private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+
+    private static bool IsUniqueEmailViolation(DbUpdateException exception) =>
+        exception.InnerException is PostgresException postgresException
+        && postgresException.SqlState == PostgresErrorCodes.UniqueViolation
+        && string.Equals(postgresException.ConstraintName, "IX_Users_Email", StringComparison.Ordinal);
 }

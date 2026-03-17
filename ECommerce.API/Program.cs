@@ -3,7 +3,9 @@ using ECommerce.API.Configuration;
 using ECommerce.API.Data;
 using ECommerce.API.Middleware;
 using ECommerce.API.Modules.Auth.Services;
+using ECommerce.API.Modules.Products.Services;
 using ECommerce.API.Modules.Auth.Validators;
+using ECommerce.API.Modules.Products.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,6 +29,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -34,6 +37,7 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ProductRequestValidator>();
 
 // Authentication / Authorization
 var keyBytes = Encoding.UTF8.GetBytes(jwtSettings.Secret);

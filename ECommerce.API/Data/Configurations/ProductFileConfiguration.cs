@@ -28,6 +28,9 @@ public class ProductFileConfiguration : IEntityTypeConfiguration<ProductFile>
             .IsRequired()
             .HasMaxLength(2048);
 
+        builder.Property(f => f.BinaryContent)
+            .IsRequired();
+
         builder.Property(f => f.SizeInBytes)
             .IsRequired();
 

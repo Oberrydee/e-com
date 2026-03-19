@@ -22,7 +22,10 @@ public class ProductProfile : Profile
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
 
         CreateMap<Product, ProductResponseDto>()
-            .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.File == null ? string.Empty : src.File.FilePath))
+            .ForMember(dest => dest.Image, opt => opt.MapFrom(src =>
+                src.File == null || src.File.BinaryContent.Length == 0
+                    ? string.Empty
+                    : Convert.ToBase64String(src.File.BinaryContent)))
             .ForMember(dest => dest.ImageFileName, opt => opt.MapFrom(src => src.File == null ? string.Empty : src.File.OriginalFileName))
             .ForMember(dest => dest.ImageContentType, opt => opt.MapFrom(src => src.File == null ? string.Empty : src.File.ContentType))
             .ForMember(dest => dest.ImageSizeInBytes, opt => opt.MapFrom(src => src.File == null ? 0 : src.File.SizeInBytes))

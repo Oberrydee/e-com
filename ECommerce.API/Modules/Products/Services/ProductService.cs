@@ -34,7 +34,7 @@ public class ProductService : IProductService
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();
 
-        return _mapper.Map<IReadOnlyCollection<ProductResponseDto>>(products);
+        return products.Select(MapToResponse).ToList();
     }
 
     public async Task<ProductResponseDto?> GetByIdAsync(int id)
@@ -44,7 +44,7 @@ public class ProductService : IProductService
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == id);
 
-        return product is null ? null : _mapper.Map<ProductResponseDto>(product);
+        return product is null ? null : MapToResponse(product);
     }
 
     public async Task<ProductResponseDto> CreateAsync(ProductRequestDto request)
@@ -62,6 +62,7 @@ public class ProductService : IProductService
             OriginalFileName = storedFile.OriginalFileName,
             ContentType = storedFile.ContentType,
             FilePath = storedFile.RelativePath,
+            BinaryContent = storedFile.BinaryContent,
             SizeInBytes = storedFile.SizeInBytes,
             CreatedAt = now,
             UpdatedAt = now
@@ -71,7 +72,7 @@ public class ProductService : IProductService
         await _dbContext.SaveChangesAsync();
 
         await _dbContext.Entry(product).Reference(p => p.File).LoadAsync();
-        return _mapper.Map<ProductResponseDto>(product);
+        return MapToResponse(product);
     }
 
     public async Task<ProductResponseDto?> UpdateAsync(int id, ProductRequestDto request)
@@ -106,6 +107,7 @@ public class ProductService : IProductService
         product.File.OriginalFileName = storedFile.OriginalFileName;
         product.File.ContentType = storedFile.ContentType;
         product.File.FilePath = storedFile.RelativePath;
+        product.File.BinaryContent = storedFile.BinaryContent;
         product.File.SizeInBytes = storedFile.SizeInBytes;
         product.File.UpdatedAt = now;
         product.UpdatedAt = now;
@@ -114,7 +116,7 @@ public class ProductService : IProductService
 
         DeleteImageIfExists(oldRelativePath, product.File.FilePath);
 
-        return _mapper.Map<ProductResponseDto>(product);
+        return MapToResponse(product);
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -142,8 +144,14 @@ public class ProductService : IProductService
         var generatedFileName = $"{Guid.NewGuid():N}{extension}";
         var absolutePath = Path.Combine(_storageRoot, generatedFileName);
 
-        await using var stream = new FileStream(absolutePath, FileMode.Create);
-        await imageFile.CopyToAsync(stream);
+        byte[] binaryContent;
+        await using (var memoryStream = new MemoryStream())
+        {
+            await imageFile.CopyToAsync(memoryStream);
+            binaryContent = memoryStream.ToArray();
+        }
+
+        await System.IO.File.WriteAllBytesAsync(absolutePath, binaryContent);
 
         return new StoredFileResult
         {
@@ -151,8 +159,48 @@ public class ProductService : IProductService
             OriginalFileName = Path.GetFileName(imageFile.FileName),
             ContentType = imageFile.ContentType,
             RelativePath = $"{ProductImagesDirectoryName}/{generatedFileName}",
-            SizeInBytes = imageFile.Length
+            BinaryContent = binaryContent,
+            SizeInBytes = binaryContent.LongLength
         };
+    }
+
+    private ProductResponseDto MapToResponse(Product product)
+    {
+        var response = _mapper.Map<ProductResponseDto>(product);
+
+        if (string.IsNullOrEmpty(response.Image))
+        {
+            response.Image = BuildImageFallback(product.File);
+        }
+
+        return response;
+    }
+
+    private string BuildImageFallback(ProductFile? file)
+    {
+        if (file is null)
+        {
+            return string.Empty;
+        }
+
+        if (file.BinaryContent.Length > 0)
+        {
+            return Convert.ToBase64String(file.BinaryContent);
+        }
+
+        if (string.IsNullOrWhiteSpace(file.FilePath))
+        {
+            return string.Empty;
+        }
+
+        var absolutePath = Path.Combine(_contentRoot, file.FilePath.Replace('/', Path.DirectorySeparatorChar));
+
+        if (!System.IO.File.Exists(absolutePath))
+        {
+            return string.Empty;
+        }
+
+        return Convert.ToBase64String(System.IO.File.ReadAllBytes(absolutePath));
     }
 
     private void DeleteImageIfExists(string? relativePath, string? skipIfPathEquals = null)
@@ -191,6 +239,7 @@ public class ProductService : IProductService
         public string OriginalFileName { get; init; } = string.Empty;
         public string ContentType { get; init; } = string.Empty;
         public string RelativePath { get; init; } = string.Empty;
+        public byte[] BinaryContent { get; init; } = [];
         public long SizeInBytes { get; init; }
     }
 }

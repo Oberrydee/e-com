@@ -8,6 +8,7 @@ public class ProductFile : BaseEntity
     public string OriginalFileName { get; set; } = string.Empty;
     public string ContentType { get; set; } = string.Empty;
     public string FilePath { get; set; } = string.Empty;
+    public byte[] BinaryContent { get; set; } = [];
     public long SizeInBytes { get; set; }
 
     public int ProductId { get; set; }

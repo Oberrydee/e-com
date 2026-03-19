@@ -11,4 +11,4 @@ Methode 2: utiliser le script de lancement d'une BDD locale au projet (se positi
 LANCEMENT DU SWAGGER UI
 Dans le dossier "ECommerce.API", lancer dotnet run dans un terminal powershell
 
-ADRESSE d'ECOUTE: "https://localhost:5282/swagger/index.html" 
+ADRESSE du swagger: "https://localhost:5282/swagger/index.html" 

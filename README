@@ -6,6 +6,7 @@ Methode 1:
 - Installer PostgreSQL sur la machine, sélectioner "C:\Program Files\" comme destination lors de l'installation. (les scripts supposent l'emplacement C:\Program Files\PostgreSQL\17\bin)
 - Créer la BDD localement avec les paramètres dans appsettings.json
 Methode 2: utiliser le script de lancement d'une BDD locale au projet (se positionner à la racine du projet et lancer la commande ".\scripts\start-dev-db.ps1" dans un terminal powershell)
+    -> lancer ".\scripts\stop-dev-db.ps1" pour l'arrêter
 
 LANCEMENT DU SWAGGER UI
 Dans le dossier "ECommerce.API", lancer dotnet run dans un terminal powershell

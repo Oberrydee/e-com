@@ -6,6 +6,7 @@ namespace ECommerce.API.Modules.Products.Validators;
 public class ProductRequestValidator : AbstractValidator<ProductRequestDto>
 {
     private static readonly string[] AllowedInventoryStatuses = ["INSTOCK", "LOWSTOCK", "OUTOFSTOCK"];
+    private const long MaxFileSizeBytes = 5 * 1024 * 1024;
 
     public ProductRequestValidator()
     {
@@ -21,9 +22,13 @@ public class ProductRequestValidator : AbstractValidator<ProductRequestDto>
             .NotEmpty().WithMessage("Description is required.")
             .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters.");
 
-        RuleFor(x => x.Image)
-            .NotEmpty().WithMessage("Image is required.")
-            .MaximumLength(2048).WithMessage("Image must not exceed 2048 characters.");
+        RuleFor(x => x.ImageFile)
+            .NotNull().WithMessage("Image file is required.")
+            .Must(file => file is not null && file.Length > 0).WithMessage("Image file must not be empty.")
+            .Must(file => file is not null && file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            .WithMessage("Uploaded file must be an image.")
+            .Must(file => file is not null && file.Length <= MaxFileSizeBytes)
+            .WithMessage("Image file must not exceed 5 MB.");
 
         RuleFor(x => x.Category)
             .NotEmpty().WithMessage("Category is required.")

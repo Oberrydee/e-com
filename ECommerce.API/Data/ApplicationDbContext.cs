@@ -14,6 +14,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Cart> Carts => Set<Cart>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductFile> ProductFiles => Set<ProductFile>();
     public DbSet<ProductInCart> ProductsInCart => Set<ProductInCart>();
     public DbSet<Wishlist> Wishlists => Set<Wishlist>();
     public DbSet<ProductInWishlist> ProductsInWishlist => Set<ProductInWishlist>();

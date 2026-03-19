@@ -31,16 +31,18 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
+    [Consumes("multipart/form-data")]
     [Authorize(Policy = "ProductManagement")]
-    public async Task<IActionResult> Create([FromBody] ProductRequestDto request)
+    public async Task<IActionResult> Create([FromForm] ProductRequestDto request)
     {
         var product = await _productService.CreateAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
     }
 
     [HttpPut("{id:int}")]
+    [Consumes("multipart/form-data")]
     [Authorize(Policy = "ProductManagement")]
-    public async Task<IActionResult> Update(int id, [FromBody] ProductRequestDto request)
+    public async Task<IActionResult> Update(int id, [FromForm] ProductRequestDto request)
     {
         var product = await _productService.UpdateAsync(id, request);
         return product is null ? NotFound() : Ok(product);

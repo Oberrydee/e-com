@@ -24,10 +24,6 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .IsRequired()
             .HasMaxLength(2000);
 
-        builder.Property(p => p.Image)
-            .IsRequired()
-            .HasMaxLength(2048);
-
         builder.Property(p => p.Category)
             .IsRequired()
             .HasMaxLength(100);
@@ -60,6 +56,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.Property(p => p.UpdatedAt)
             .IsRequired();
+
+        builder.HasOne(p => p.File)
+            .WithOne(f => f.Product)
+            .HasForeignKey<ProductFile>(f => f.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private static string ConvertInventoryStatusToString(Common.Enums.InventoryStatus status) => status switch

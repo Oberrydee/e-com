@@ -8,7 +8,6 @@ public class Product : BaseEntity
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string Image { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int Quantity { get; set; }
@@ -16,6 +15,7 @@ public class Product : BaseEntity
     public int ShellId { get; set; }
     public InventoryStatus InventoryStatus { get; set; } = InventoryStatus.OutOfStock;
     public double Rating { get; set; }
+    public ProductFile? File { get; set; }
     public ICollection<ProductInCart> ProductsInCart { get; set; } = [];
     public ICollection<ProductInWishlist> ProductsInWishlist { get; set; } = [];
 }

@@ -12,7 +12,6 @@ Methode 2:
 - Créer la BDD localement avec les paramètres dans appsettings.json
         Details pour la methode 2 avec un outil comme DBeaver:
         - Installer PostgreSQL localement et verifier que le service PostgreSQL est demarre.
-        - Ouvrir le fichier `ECommerce.API/appsettings.json` et relever la chaine de connexion dans `ConnectionStrings:DefaultConnection`.
         - Avec la configuration actuelle du projet, les valeurs sont:
         `Host=localhost`
         `Port=5433`

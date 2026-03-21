@@ -1,4 +1,5 @@
 using ECommerce.API.Modules.Auth.Entities;
+using ECommerce.API.Modules.Contact.Entities;
 using ECommerce.API.Modules.Products.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserContactRequest> UserContactRequests => Set<UserContactRequest>();
     public DbSet<Cart> Carts => Set<Cart>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductFile> ProductFiles => Set<ProductFile>();

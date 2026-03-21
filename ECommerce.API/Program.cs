@@ -4,8 +4,10 @@ using ECommerce.API.Configuration;
 using ECommerce.API.Data;
 using ECommerce.API.Middleware;
 using ECommerce.API.Modules.Auth.Services;
+using ECommerce.API.Modules.Contact.Services;
 using ECommerce.API.Modules.Products.Services;
 using ECommerce.API.Modules.Auth.Validators;
+using ECommerce.API.Modules.Contact.Validators;
 using ECommerce.API.Modules.Products.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -30,6 +32,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IWishlistService, WishlistService>();
@@ -40,6 +43,7 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateUserContactRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ProductRequestValidator>();
 
 // Authentication / Authorization

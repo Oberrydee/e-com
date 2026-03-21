@@ -1,3 +1,4 @@
+using AutoMapper;
 using ECommerce.API.Data;
 using ECommerce.API.Modules.Products.DTOs;
 using ECommerce.API.Modules.Products.Entities;
@@ -8,10 +9,12 @@ namespace ECommerce.API.Modules.Products.Services;
 public class WishlistService : IWishlistService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IMapper _mapper;
 
-    public WishlistService(ApplicationDbContext dbContext)
+    public WishlistService(ApplicationDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
+        _mapper = mapper;
     }
 
     public async Task<IReadOnlyCollection<WishlistResponseDto>> GetAllAsync()
@@ -21,7 +24,7 @@ public class WishlistService : IWishlistService
             .OrderByDescending(wishlist => wishlist.CreatedAt)
             .ToListAsync();
 
-        return wishlists.Select(MapToResponse).ToList();
+        return _mapper.Map<IReadOnlyCollection<WishlistResponseDto>>(wishlists);
     }
 
     public async Task<WishlistResponseDto?> GetByIdAsync(int id)
@@ -30,7 +33,7 @@ public class WishlistService : IWishlistService
             .AsNoTracking()
             .FirstOrDefaultAsync(wishlist => wishlist.Id == id);
 
-        return wishlist is null ? null : MapToResponse(wishlist);
+        return wishlist is null ? null : _mapper.Map<WishlistResponseDto>(wishlist);
     }
 
     public async Task<WishlistResponseDto> CreateAsync(WishlistRequestDto request)
@@ -38,18 +41,14 @@ public class WishlistService : IWishlistService
         await EnsureUserExistsAsync(request.UserId);
 
         var now = DateTime.UtcNow;
-        var wishlist = new Wishlist
-        {
-            UserId = request.UserId,
-            Label = request.Label.Trim(),
-            CreatedAt = now,
-            UpdatedAt = now
-        };
+        var wishlist = _mapper.Map<Wishlist>(request);
+        wishlist.CreatedAt = now;
+        wishlist.UpdatedAt = now;
 
         _dbContext.Wishlists.Add(wishlist);
         await _dbContext.SaveChangesAsync();
 
-        return MapToResponse(wishlist);
+        return _mapper.Map<WishlistResponseDto>(wishlist);
     }
 
     public async Task<WishlistResponseDto?> UpdateAsync(int id, WishlistRequestDto request)
@@ -62,13 +61,12 @@ public class WishlistService : IWishlistService
 
         await EnsureUserExistsAsync(request.UserId);
 
-        wishlist.UserId = request.UserId;
-        wishlist.Label = request.Label.Trim();
+        _mapper.Map(request, wishlist);
         wishlist.UpdatedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync();
 
-        return MapToResponse(wishlist);
+        return _mapper.Map<WishlistResponseDto>(wishlist);
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -95,13 +93,4 @@ public class WishlistService : IWishlistService
             throw new InvalidOperationException("User not found.");
         }
     }
-
-    private static WishlistResponseDto MapToResponse(Wishlist wishlist) => new()
-    {
-        Id = wishlist.Id,
-        UserId = wishlist.UserId,
-        Label = wishlist.Label,
-        CreatedAt = wishlist.CreatedAt,
-        UpdatedAt = wishlist.UpdatedAt
-    };
 }

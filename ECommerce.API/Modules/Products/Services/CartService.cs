@@ -1,3 +1,4 @@
+using AutoMapper;
 using ECommerce.API.Data;
 using ECommerce.API.Modules.Products.DTOs;
 using ECommerce.API.Modules.Products.Entities;
@@ -8,10 +9,12 @@ namespace ECommerce.API.Modules.Products.Services;
 public class CartService : ICartService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IMapper _mapper;
 
-    public CartService(ApplicationDbContext dbContext)
+    public CartService(ApplicationDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
+        _mapper = mapper;
     }
 
     public async Task<IReadOnlyCollection<ProductInCartResponseDto>> GetAllAsync()
@@ -21,7 +24,7 @@ public class CartService : ICartService
             .OrderByDescending(item => item.CreatedAt)
             .ToListAsync();
 
-        return items.Select(MapToResponse).ToList();
+        return _mapper.Map<IReadOnlyCollection<ProductInCartResponseDto>>(items);
     }
 
     public async Task<ProductInCartResponseDto?> GetByIdAsync(int id)
@@ -30,7 +33,7 @@ public class CartService : ICartService
             .AsNoTracking()
             .FirstOrDefaultAsync(item => item.Id == id);
 
-        return item is null ? null : MapToResponse(item);
+        return item is null ? null : _mapper.Map<ProductInCartResponseDto>(item);
     }
 
     public async Task<ProductInCartResponseDto> CreateAsync(ProductInCartRequestDto request)
@@ -47,19 +50,14 @@ public class CartService : ICartService
         }
 
         var now = DateTime.UtcNow;
-        var item = new ProductInCart
-        {
-            CartId = request.CartId,
-            ProductId = request.ProductId,
-            Quantity = request.Quantity,
-            CreatedAt = now,
-            UpdatedAt = now
-        };
+        var item = _mapper.Map<ProductInCart>(request);
+        item.CreatedAt = now;
+        item.UpdatedAt = now;
 
         _dbContext.ProductsInCart.Add(item);
         await _dbContext.SaveChangesAsync();
 
-        return MapToResponse(item);
+        return _mapper.Map<ProductInCartResponseDto>(item);
     }
 
     public async Task<ProductInCartResponseDto?> UpdateAsync(int id, ProductInCartRequestDto request)
@@ -84,14 +82,12 @@ public class CartService : ICartService
             throw new InvalidOperationException("This product is already in the cart.");
         }
 
-        item.CartId = request.CartId;
-        item.ProductId = request.ProductId;
-        item.Quantity = request.Quantity;
+        _mapper.Map(request, item);
         item.UpdatedAt = DateTime.UtcNow;
 
         await _dbContext.SaveChangesAsync();
 
-        return MapToResponse(item);
+        return _mapper.Map<ProductInCartResponseDto>(item);
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -127,14 +123,4 @@ public class CartService : ICartService
             throw new InvalidOperationException("Product not found.");
         }
     }
-
-    private static ProductInCartResponseDto MapToResponse(ProductInCart item) => new()
-    {
-        Id = item.Id,
-        CartId = item.CartId,
-        ProductId = item.ProductId,
-        Quantity = item.Quantity,
-        CreatedAt = item.CreatedAt,
-        UpdatedAt = item.UpdatedAt
-    };
 }

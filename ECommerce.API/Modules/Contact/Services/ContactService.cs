@@ -1,3 +1,4 @@
+using AutoMapper;
 using ECommerce.API.Common.Enums;
 using ECommerce.API.Data;
 using ECommerce.API.Modules.Contact.DTOs;
@@ -10,16 +11,18 @@ public class ContactService : IContactService
 {
     private static readonly DateTime EmptyCreatedAt = new(1, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     private readonly ApplicationDbContext _dbContext;
+    private readonly IMapper _mapper;
 
-    public ContactService(ApplicationDbContext dbContext)
+    public ContactService(ApplicationDbContext dbContext, IMapper mapper)
     {
         _dbContext = dbContext;
+        _mapper = mapper;
     }
 
     public async Task<UserContactRequestResponseDto> GetAdminContactAsync()
     {
         var adminContact = await GetOrCreateAdminContactAsync();
-        return MapToResponse(adminContact);
+        return _mapper.Map<UserContactRequestResponseDto>(adminContact);
     }
 
     public async Task<UserContactRequestResponseDto> UpdateAdminContactAsync(UpdateAdminContactRequestDto request, int adminUserId)
@@ -30,25 +33,20 @@ public class ContactService : IContactService
 
         await _dbContext.SaveChangesAsync();
 
-        return MapToResponse(adminContact);
+        return _mapper.Map<UserContactRequestResponseDto>(adminContact);
     }
 
     public async Task<UserContactRequestResponseDto> CreateUserContactRequestAsync(CreateUserContactRequestDto request)
     {
-        var contactRequest = new UserContactRequest
-        {
-            Id = Guid.NewGuid(),
-            Email = request.Email.Trim(),
-            UserId = request.UserId,
-            Message = request.Message.Trim(),
-            CreatedAt = DateTime.UtcNow,
-            Status = ContactRequestStatus.New
-        };
+        var contactRequest = _mapper.Map<UserContactRequest>(request);
+        contactRequest.Id = Guid.NewGuid();
+        contactRequest.CreatedAt = DateTime.UtcNow;
+        contactRequest.Status = ContactRequestStatus.New;
 
         _dbContext.UserContactRequests.Add(contactRequest);
         await _dbContext.SaveChangesAsync();
 
-        return MapToResponse(contactRequest);
+        return _mapper.Map<UserContactRequestResponseDto>(contactRequest);
     }
 
     private async Task<UserContactRequest> GetOrCreateAdminContactAsync()
@@ -74,14 +72,4 @@ public class ContactService : IContactService
 
         return adminContact;
     }
-
-    private static UserContactRequestResponseDto MapToResponse(UserContactRequest contactRequest) => new()
-    {
-        Id = contactRequest.Id,
-        Email = contactRequest.Email,
-        UserId = contactRequest.UserId,
-        Message = contactRequest.Message,
-        CreatedAt = contactRequest.CreatedAt,
-        Status = contactRequest.Status.ToString()
-    };
 }

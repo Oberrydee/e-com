@@ -58,6 +58,12 @@ Puis ouvrir :
 https://localhost:5282/swagger/index.html
 ```
 
+Le frontend correspondant est :
+
+```text
+https://github.com/Oberrydee/app.git
+```
+
 ## Configuration utilisee
 
 Connexion PostgreSQL par defaut :

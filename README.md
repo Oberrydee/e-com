@@ -2,6 +2,19 @@
 
 Backend ASP.NET Core 8 avec PostgreSQL.
 
+## Resume fonctionnel
+
+Cette API est le coeur metier d'une boutique e-commerce.
+
+Elle permet de :
+
+- gerer l'authentification et les comptes utilisateurs
+- exposer le catalogue produits avec leurs informations
+- alimenter les parcours d'achat (panier et wishlist)
+- recevoir et suivre les demandes de contact
+
+Elle est consommee par le frontend Angular et centralise la logique metier, les regles d'acces et la persistance des donnees.
+
 ## Prerequis
 
 Installez uniquement ceci :

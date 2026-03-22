@@ -7,8 +7,6 @@ using ECommerce.API.Modules.Auth.Services;
 using ECommerce.API.Modules.Contact.Services;
 using ECommerce.API.Modules.Products.Services;
 using ECommerce.API.Modules.Auth.Validators;
-using ECommerce.API.Modules.Contact.Validators;
-using ECommerce.API.Modules.Products.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -43,8 +41,6 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<CreateUserContactRequestValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<ProductRequestValidator>();
 
 // Authentication / Authorization
 var keyBytes = Encoding.UTF8.GetBytes(jwtSettings.Secret);

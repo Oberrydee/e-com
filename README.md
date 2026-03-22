@@ -1,41 +1,171 @@
-Comment lancer le projet: 
+# ECommerce API
 
-CONFIGURATION DE LA CONNEXION A LA BDD
-Le projet dispose d'une configuration pointant vers une base de donnée PstgreSQL. 
+Backend ASP.NET Core 8 avec PostgreSQL.
 
+## Prerequis
 
-Methode 1 (recommandée): utiliser le script de lancement d'une BDD locale au projet (se positionner à la racine du projet et lancer la commande ".\scripts\start-dev-db.ps1" dans un terminal powershell)
-    -> lancer ".\scripts\stop-dev-db.ps1" pour l'arrêter
+Installez uniquement ceci :
 
-Methode 2: 
-- Installer PostgreSQL sur la machine, sélectioner "C:\Program Files\" comme destination lors de l'installation. (les scripts supposent l'emplacement C:\Program Files\PostgreSQL\17\bin)
-- Créer la BDD localement avec les paramètres dans appsettings.json
-        Details pour la methode 2 avec un outil comme DBeaver:
-        - Installer PostgreSQL localement et verifier que le service PostgreSQL est demarre.
-        - Avec la configuration actuelle du projet, les valeurs sont:
-        `Host=localhost`
-        `Port=5433`
-        `Database=ECommerceDb`
-        `Username=postgres`
-        `Password=postgres`
-        - Dans DBeaver:
-        `Database` > `New Database Connection`
-        choisir `PostgreSQL`
-        renseigner:
-        `Host`: `localhost`
-        `Port`: `5433`
-        `Database`: `postgres` pour se connecter au serveur une premiere fois, ou `ECommerceDb` si elle existe deja
-        `Username`: `postgres`
-        `Password`: `postgres`
-        - Tester la connexion avec `Test Connection` puis valider.
-        - Si la base `ECommerceDb` n'existe pas encore, creer une nouvelle base via DBeaver:
-        clic droit sur la connexion > `Create` > `Database`
-        nom de la base: `ECommerceDb`
-        - Une fois la base creee, verifier que `appsettings.json` pointe bien vers les memes valeurs.
-        - Au lancement de l'API (`dotnet run` dans `ECommerce.API`), les migrations EF Core sont appliquees automatiquement et les tables sont creees dans la base configuree.
+1. Git for Windows
+https://git-scm.com/download/win
+2. .NET 8 SDK stable en x64
+https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+3. PostgreSQL 17 en x64
+https://www.postgresql.org/download/windows/
+4. Visual Studio Code si vous voulez editer le projet
+https://code.visualstudio.com/
 
-LANCEMENT DU SWAGGER UI
-Dans le dossier "ECommerce.API", lancer dotnet run dans un terminal powershell
+Points importants :
 
-ADRESSE du swagger: "https://localhost:5282/swagger/index.html" 
+- prendre le SDK .NET 8, pas seulement le Runtime
+- prendre une version stable .NET 8, pas une preview 10 ou 11
+- les scripts du projet attendent PostgreSQL 17 dans `C:\Program Files\PostgreSQL\17\bin`
 
+## Verification rapide
+
+Apres installation :
+
+```powershell
+git --version
+dotnet --version
+dotnet --list-sdks
+dotnet --list-runtimes
+Test-Path "C:\Program Files\PostgreSQL\17\bin\psql.exe"
+```
+
+Vous devez avoir :
+
+- un SDK .NET 8.x
+- Microsoft.NETCore.App 8.x
+- Microsoft.AspNetCore.App 8.x
+- `True` pour `psql.exe`
+
+## Procedure
+
+```powershell
+git clone https://github.com/Oberrydee/e-com.git
+cd e-com
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\start-dev-db.ps1
+dotnet restore
+cd .\ECommerce.API
+dotnet run
+```
+
+Puis ouvrir :
+
+```text
+https://localhost:5282/swagger/index.html
+```
+
+## Configuration utilisee
+
+Connexion PostgreSQL par defaut :
+
+```text
+Host=localhost
+Port=5433
+Database=ECommerceDb
+Username=postgres
+Password=postgres
+```
+
+Le fichier correspondant est `ECommerce.API/appsettings.json`.
+
+## Arret
+
+Arreter l'API avec `Ctrl+C`, puis depuis la racine du projet :
+
+```powershell
+.\scripts\stop-dev-db.ps1
+```
+
+## Erreurs possibles
+
+### `dotnet` n'est pas reconnu
+
+Le SDK .NET 8 n'est pas installe ou le terminal n'a pas ete relance.
+
+Correction : installer le SDK .NET 8, fermer PowerShell, rouvrir PowerShell, puis relancer :
+
+```powershell
+dotnet --version
+```
+
+### `No .NET SDKs were found`
+
+Le SDK n'est pas installe correctement.
+
+Correction : reinstaller le SDK .NET 8 stable, rouvrir PowerShell, puis verifier :
+
+```powershell
+dotnet --list-sdks
+```
+
+### `dotnet build` marche mais `dotnet run` dit `You must install or update .NET`
+
+Le SDK est la, mais le runtime .NET 8 requis n'est pas disponible au bon niveau.
+
+Correction : verifier :
+
+```powershell
+dotnet --list-runtimes
+```
+
+Vous devez voir au minimum :
+
+- `Microsoft.NETCore.App 8.x`
+- `Microsoft.AspNetCore.App 8.x`
+
+Si vous avez seulement une version preview ou un patch trop ancien, reinstallez le dernier SDK .NET 8 stable.
+
+### `PostgreSQL tool not found`
+
+PostgreSQL 17 n'est pas installe au chemin attendu.
+
+Correction 1 : installer PostgreSQL 17 dans :
+
+```text
+C:\Program Files\PostgreSQL\17
+```
+
+Correction 2 : ou lancer le script avec le bon chemin :
+
+```powershell
+.\scripts\start-dev-db.ps1 -PostgresBinPath "D:\PostgreSQL\17\bin"
+```
+
+### Le script PowerShell refuse de s'executer
+
+Lancer :
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+```
+
+### Echec de connexion a la base sur `localhost:5433`
+
+PostgreSQL n'est pas demarre.
+
+Correction :
+
+```powershell
+cd <racine-du-projet>
+.\scripts\start-dev-db.ps1
+cd .\ECommerce.API
+dotnet run
+```
+
+### Warning sur le certificat HTTPS
+
+Lancer :
+
+```powershell
+dotnet dev-certs https --trust
+```
+
+Puis relancer :
+
+```powershell
+dotnet run
+```
